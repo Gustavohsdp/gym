@@ -39,7 +39,12 @@ export function Exercise() {
           mt={4}
           mb={8}
         >
-          <Heading color="gray.100" fontSize="lg" flexShrink={1}>
+          <Heading
+            color="gray.100"
+            fontSize="lg"
+            flexShrink={1}
+            fontFamily="heading"
+          >
             Puxada frontal
           </Heading>
 
