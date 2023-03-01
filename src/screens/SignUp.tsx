@@ -1,6 +1,6 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigation } from "@react-navigation/native";
-import { Center, Heading, Image, Text, VStack } from "native-base";
+import { Center, Heading, Image, Text, useToast, VStack } from "native-base";
 import { Controller, useForm } from "react-hook-form";
 import { ScrollView } from "react-native";
 import * as yup from "yup";
@@ -11,6 +11,11 @@ import LogoSvg from "@assets/logo.svg";
 import { Button } from "@components/Button";
 import { Input } from "@components/Input";
 import { AuthNavigatorRoutesProps } from "@routes/auth.routes";
+
+import { useAuth } from "@hooks/useAuth";
+import { api } from "@services/api";
+import { AppError } from "@utils/AppError";
+import { useState } from "react";
 
 type FormDataProps = {
   name: string;
@@ -33,6 +38,8 @@ const signUpSchema = yup.object({
 });
 
 export function SignUp() {
+  const [isLoading, setIsLoading] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -42,13 +49,27 @@ export function SignUp() {
   });
 
   const navigation = useNavigation<AuthNavigatorRoutesProps>();
+  const toast = useToast();
+  const { signIn } = useAuth();
 
   function handleGoBack() {
     navigation.goBack();
   }
 
-  function handleSignUp(data: FormDataProps) {
-    console.log(data);
+  async function handleSignUp({ email, name, password }: FormDataProps) {
+    try {
+      setIsLoading(true);
+
+      await api.post("/users", { email, name, password });
+      await signIn(email, password);
+    } catch (error) {
+      setIsLoading(false);
+      const isAppError = error instanceof AppError;
+      const title = isAppError
+        ? error.message
+        : "Não foi possível criar a conta. Tente novamente mais tarde. ";
+      toast.show({ title, placement: "top", bgColor: "red.500" });
+    }
   }
 
   return (
@@ -138,6 +159,7 @@ export function SignUp() {
           <Button
             title="Criar e acessar"
             onPress={handleSubmit(handleSignUp)}
+            isLoading={isLoading}
           />
         </Center>
 
