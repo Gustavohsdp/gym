@@ -36,6 +36,7 @@ $ cd gym-api
 ```bash
 $ cd gym-api
 $ npm i
+$ npm run migrate
 $ npm run dev
 ```
 
